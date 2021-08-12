@@ -27,18 +27,13 @@ import (
 )
 
 type Generate struct {
-	globalCmd *cobra.Command
-	configs   config.IConfig
+	configs *config.Config
 }
 
-func NewGenerateCommand() *Generate {
+func NewGenerateCommand(cfg *config.Config) *Generate {
 	return &Generate{
-		configs: config.NewConfig(),
+		configs: cfg,
 	}
-}
-
-func (g *Generate) SetGlobalCmd(globalCmd *cobra.Command) {
-	g.globalCmd = globalCmd
 }
 
 func (g *Generate) CreateCobraCmd() *cobra.Command {
@@ -111,6 +106,5 @@ func (g *Generate) readFileAndCreateNewKeys() error {
 		logger.LogError(
 			messages.MsgErrorErrorOnReadConfigFile+g.configs.GetConfigFilePath(), configFile.Close())
 	}()
-	g.configs = g.configs.NewConfigsFromViper()
 	return g.writeConfigOnFile(configFile)
 }

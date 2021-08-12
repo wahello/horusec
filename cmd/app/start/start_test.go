@@ -22,16 +22,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-
 	mock_config "github.com/ZupIT/horusec/config/mocks"
-	"github.com/ZupIT/horusec/internal/helpers/messages"
-
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/horusec/internal/controllers/requirements"
+	"github.com/ZupIT/horusec/internal/helpers/messages"
 
 	"github.com/sirupsen/logrus"
 
@@ -43,6 +41,7 @@ import (
 	"github.com/ZupIT/horusec/internal/utils/prompt"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -59,7 +58,7 @@ func TestMain(m *testing.M) {
 
 func TestNewStartCommand(t *testing.T) {
 	t.Run("Should run NewStartCommand and return type correctly", func(t *testing.T) {
-		assert.IsType(t, NewStartCommand(config.NewConfig()), &Start{})
+		assert.IsType(t, NewStartCommand(config.New()), &Start{})
 	})
 }
 
@@ -67,10 +66,7 @@ func TestStartCommand_Execute(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
-	globalCmd := &cobra.Command{}
-	_ = globalCmd.PersistentFlags().String("log-level", "", "Set verbose level of the CLI. Log Level enable is: \"panic\",\"fatal\",\"error\",\"warn\",\"info\",\"debug\",\"trace\"")
-	_ = globalCmd.PersistentFlags().String("config-file-path", "", "Path of the file horusec-config.json to setup content of horusec")
-	_ = globalCmd.PersistentFlags().StringP("log-file-path", "l", "", `set user defined log file path instead of default`)
+
 	t.Run("Should execute command exec without error and ask to user if is to run in current directory", func(t *testing.T) {
 		promptMock := &prompt.Mock{}
 		promptMock.On("Ask").Return("Y", nil)
@@ -78,7 +74,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -91,7 +87,6 @@ func TestStartCommand_Execute(t *testing.T) {
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
-			globalCmd:    globalCmd,
 			analyzer:     analyzerControllerMock,
 			requirements: requirementsMock,
 		}
@@ -110,7 +105,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -120,7 +115,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -143,7 +137,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -153,7 +147,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -176,7 +169,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -186,7 +179,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -209,7 +201,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -219,7 +211,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -243,7 +234,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New().MergeFromEnvironmentVariables()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -253,7 +244,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -278,7 +268,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -289,7 +279,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateGit")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -313,7 +302,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		stdoutMock := bytes.NewBufferString("")
 		logrus.SetOutput(stdoutMock)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		analyzerControllerMock := &analyzer.Mock{}
@@ -323,7 +312,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -343,14 +331,13 @@ func TestStartCommand_Execute(t *testing.T) {
 		promptMock := &prompt.Mock{}
 		promptMock.On("Ask").Return("Y", nil)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		requirementsMock := &requirements.Mock{}
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -371,6 +358,10 @@ func TestStartCommand_Execute(t *testing.T) {
 		cobraCmd := cmd.CreateStartCommand()
 		cobraCmd.SetOut(w)
 		cobraCmd.SetArgs([]string{"-p", "./", "-o", "json", "-O", "./tmp-json.json"})
+
+		cobra.OnInitialize(func() {
+			assert.NoError(t, configs.Normalize().Eval(), "Expected nil error to eval config")
+		})
 
 		assert.NoError(t, cobraCmd.Execute())
 		err := w.Close()
@@ -399,14 +390,13 @@ func TestStartCommand_Execute(t *testing.T) {
 		promptMock := &prompt.Mock{}
 		promptMock.On("Ask").Return("Y", nil)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		requirementsMock := &requirements.Mock{}
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -426,6 +416,10 @@ func TestStartCommand_Execute(t *testing.T) {
 		cobraCmd := cmd.CreateStartCommand()
 		cobraCmd.SetOut(w)
 		cobraCmd.SetArgs([]string{"-p", "./", "--information-severity", "true"})
+
+		cobra.OnInitialize(func() {
+			require.Nil(t, configs.Normalize().Eval(), "Expected nil error to eval config")
+		})
 
 		assert.NoError(t, cobraCmd.Execute())
 		err := w.Close()
@@ -447,14 +441,13 @@ func TestStartCommand_Execute(t *testing.T) {
 		promptMock := &prompt.Mock{}
 		promptMock.On("Ask").Return("Y", nil)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		requirementsMock := &requirements.Mock{}
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -475,6 +468,10 @@ func TestStartCommand_Execute(t *testing.T) {
 		cobraCmd.SetOut(w)
 		cobraCmd.SetArgs([]string{"-p", "./", "-u", "https://google.com", "-a", uuid.NewString()})
 
+		cobra.OnInitialize(func() {
+			require.Nil(t, configs.Normalize().Eval(), "Expected nil error to eval config")
+		})
+
 		assert.NoError(t, cobraCmd.Execute())
 		err := w.Close()
 		os.Stdout = oldStdout
@@ -494,14 +491,13 @@ func TestStartCommand_Execute(t *testing.T) {
 		promptMock := &prompt.Mock{}
 		promptMock.On("Ask").Return("Y", nil)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
 
 		requirementsMock := &requirements.Mock{}
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -522,6 +518,10 @@ func TestStartCommand_Execute(t *testing.T) {
 		cobraCmd := cmd.CreateStartCommand()
 		cobraCmd.SetOut(w)
 		cobraCmd.SetArgs([]string{"-p", "./", "-o", "sonarqube", "-O", "./tmp-sonarqube.json"})
+
+		cobra.OnInitialize(func() {
+			require.Nil(t, configs.Normalize().Eval(), "Expected nil error to eval config")
+		})
 
 		assert.NoError(t, cobraCmd.Execute())
 		err := w.Close()
@@ -555,7 +555,7 @@ func TestStartCommand_Execute(t *testing.T) {
 		promptMock := &prompt.Mock{}
 		promptMock.On("Ask").Return("Y", nil)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetConfigFilePath("./not-exists.json")
 		configs.SetWorkDir(&workdir.WorkDir{})
 
@@ -563,7 +563,6 @@ func TestStartCommand_Execute(t *testing.T) {
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -584,6 +583,10 @@ func TestStartCommand_Execute(t *testing.T) {
 		cobraCmd := cmd.CreateStartCommand()
 		cobraCmd.SetOut(w)
 		cobraCmd.SetArgs([]string{"-p", dstProject, "-s", "CRITICAL, LOW"})
+
+		cobra.OnInitialize(func() {
+			require.Nil(t, configs.Normalize().Eval(), "Expected nil error to eval config")
+		})
 
 		assert.NoError(t, cobraCmd.Execute())
 		err := w.Close()
@@ -612,15 +615,13 @@ func TestStartCommand_Execute(t *testing.T) {
 		promptMock := &prompt.Mock{}
 		promptMock.On("Ask").Return("Y", nil)
 
-		configs := config.NewConfig()
+		configs := config.New()
 		configs.SetWorkDir(&workdir.WorkDir{})
-		configs.NewConfigsFromEnvironments()
 
 		requirementsMock := &requirements.Mock{}
 		requirementsMock.On("ValidateDocker")
 
 		cmd := &Start{
-			globalCmd:    globalCmd,
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
@@ -640,6 +641,10 @@ func TestStartCommand_Execute(t *testing.T) {
 		cobraCmd := cmd.CreateStartCommand()
 		cobraCmd.SetOut(w)
 		cobraCmd.SetArgs([]string{"-p", dstProject})
+
+		cobra.OnInitialize(func() {
+			require.Nil(t, configs.Normalize().Eval(), "Expected nil error to eval config")
+		})
 
 		assert.NoError(t, cobraCmd.Execute())
 		err := w.Close()
@@ -666,7 +671,6 @@ func TestStartCommand_Execute(t *testing.T) {
 
 		configs := &config.Config{}
 		configs.SetWorkDir(&workdir.WorkDir{})
-		configs.SetSystemCall(sysCallMock)
 		expetedError := errors.New("error")
 		sysCallMock.EXPECT().Stat(gomock.Any()).Return(nil, expetedError)
 		sysCallMock.EXPECT().Stat(gomock.Any()).Return(nil, expetedError)
@@ -686,7 +690,6 @@ func TestStartCommand_Execute(t *testing.T) {
 			useCases:     cli.NewCLIUseCases(),
 			configs:      configs,
 			prompt:       promptMock,
-			globalCmd:    globalCmd,
 			analyzer:     analyzerControllerMock,
 			requirements: requirementsMock,
 		}
